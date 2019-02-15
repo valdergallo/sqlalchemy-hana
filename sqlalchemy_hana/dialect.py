@@ -12,6 +12,7 @@
 # either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
+import json
 from functools import wraps
 import json
 
@@ -687,6 +688,20 @@ class HANAHDBCLIDialect(HANABaseDialect):
                 return json.loads(value)
             except ValueError:
                 return value
+
+    def _json_serializer(self, value):
+        return json.dumps(value)
+
+    def _json_deserializer(self, value):
+        value = value.replace('\\"', '"')
+        value = value.replace('\"', '"')
+        value = value.replace(', ,', ',')
+        value = value.replace(', }', '}')
+        if value:
+            try:
+                return json.loads(value)
+            except ValueError:
+                return "JSONLOAD_ERROR-> ", value
 
 
 def _fix_integrity_error(f):
